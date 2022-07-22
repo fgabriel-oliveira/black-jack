@@ -19,16 +19,16 @@ fn number_show(&self) -> String {
             _ => panic!("Algo de errado aconteceu")
         }
     }else {
-        self.number.to_string()
+        format!("{}", self.number)
     }
 }
 
-fn naipe_show(&self) -> String {
+fn naipe_show(&self) -> &str {
     match self.naipe {
-        0 =>  "♠️".to_string(),
-        1 =>  "♥️".to_string(),
-        2 => "♦️".to_string(),
-        3 => "♣️".to_string(),
+        0 =>  "♠️",
+        1 =>  "♥️",
+        2 => "♦️",
+        3 => "♣️",
         _ => panic!("algo deu errado")
     }
     
