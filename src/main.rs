@@ -4,17 +4,83 @@ use rand::thread_rng;
 use rand::Rng;
 use std::io::stdin;
 
-fn start() -> u32 {
-    let mut hand = 0;
-    let mut counter = 0;
 
-    while counter < 3 {
-        hand += thread_rng().gen_range(1, 13);
-        
-        counter += 3;
+struct Card {
+    naipe: u32,
+    number: u32,
+}
+impl Card {
+fn number_show(&self) -> String {
+    if self.number >= 11 {
+        match self.number {
+            11 => "J".to_string(),
+            12 => "Q".to_string(),
+            13 => "K".to_string(),
+            _ => panic!("Algo de errado aconteceu")
+        }
+    }else {
+        self.number.to_string()
+    }
+}
+
+fn naipe_show(&self) -> String {
+    match self.naipe {
+        0 =>  "♠️".to_string(),
+        1 =>  "♥️".to_string(),
+        2 => "♦️".to_string(),
+        3 => "♣️".to_string(),
+        _ => panic!("algo deu errado")
+    }
+    
+}
+}
+
+fn win_check(bot_hand:&u32, player_hand:&u32) -> bool {
+    if bot_hand > &21{
+        true
+    }else if player_hand > &21 {
+        false
+    }else if player_hand > bot_hand {
+        true
+    }else if bot_hand > player_hand {
+        false
+    }else{
+        panic!("algo deu errado");
+    }
+}
+
+fn cards_print(hand:&Vec<Card>) {
+    for carta in hand {
+        println!("{}{} ", carta.number_show(), carta.naipe_show());
+    }
+    
     }
 
-    hand
+fn cards_gen() -> Card {
+    let card_number = thread_rng().gen_range(1, 14);
+    let card_naipe = thread_rng().gen_range(0, 4);
+
+    let carta = Card {
+        number: card_number,
+        naipe: card_naipe,
+    };
+
+    carta
+}
+
+fn start() -> (Vec<Card>, u32) {
+    let mut hand = Vec::new();
+    let mut counter = 0;
+    let mut sum = 0;
+    while counter < 2 {
+        let card = cards_gen();
+        sum += card.number;
+        hand.push(card);
+        
+        counter += 1;
+    }
+
+    (hand, sum)
 }
 
 fn cmd_read() -> bool {
@@ -33,47 +99,63 @@ fn cmd_read() -> bool {
     }
 }
 
-fn hit(hand: &mut u32) -> u32 {
-    *hand += thread_rng().gen_range(1, 13);
-
-    *hand
-}
-
 fn main() {
-    let mut bot_hand: u32 = start();
-    let mut player_hand: u32 = start();
+    let mut bot_hand = start();
+    let mut player_hand = start();
 
-    println!("Esse é um simples jogo de black jack");
+    
+    println!("\nPlayer:");
+    cards_print(&player_hand.0);
+    println!("Total:{}", player_hand.1);
+
+    println!("\nBot:");
+    cards_print(&bot_hand.0);
+    println!("Total: {}", bot_hand.1);
+
 
     loop {
-        println!("bot:{} player:{}", bot_hand, player_hand);
+        if bot_hand.1 >= 21 || player_hand.1 >= 21 {
+            break
+        }else{
+            
+            if cmd_read(){
+                let player_card = cards_gen();
+                player_hand.1 += &player_card.number;
+                player_hand.0.push(player_card);
 
-
-        if bot_hand < 21 && player_hand < 21 {
-            let movement = cmd_read();
-
-            if movement == true {
-                player_hand = hit(&mut player_hand);
-                bot_hand = hit(&mut bot_hand);
+            if bot_hand.1 < player_hand.1 && player_hand.1 <= 21 {
+                let bot_card = cards_gen();
+                bot_hand.1 += &bot_card.number;
+                bot_hand.0.push(bot_card);
             }
-            else {
+
+            }else{
                 break;
             }
-        } else {
-            break;
         }
-    
-    
+
+        println!("\nPlayer: ");
+        cards_print(&player_hand.0);
+        println!("Total: {}", player_hand.1);
+
+        println!("\nBot:");
+        cards_print(&bot_hand.0);
+        println!("Total: {}", bot_hand.1);
     }
 
-    
+    println!("\nPlayer: ");
+    cards_print(&player_hand.0);
+    println!("Total: {}", player_hand.1);
 
-    if (21 - player_hand) < (21 - bot_hand) {
-        println!("Você venceu");
-    }else if  (21 - player_hand) > (21 - bot_hand){
-        println!("Você perdeu");
+    println!("\nBot:");
+    cards_print(&bot_hand.0);
+    println!("Total: {}", bot_hand.1);
+
+    if win_check(&bot_hand.1, &player_hand.1){
+        println!("\nVocê venceu");
     }else {
-        println!("Empate");
+        println!("\nVocê perdeu");
     }
+   
 }
 
